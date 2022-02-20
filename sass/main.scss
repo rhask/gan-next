@@ -1,0 +1,123 @@
+$bg-primary: #0a426b;
+$fg-primary: #006390;
+
+@font-face {
+  font-family: "Proxima Vara";
+  src: url("pvw.woff2") format("woff2-variations");
+}
+
+// Normalize box sizing
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font: 16px/1.5 "Proxima Vara", system-ui, sans-serif;
+}
+
+body {
+  font-size: 18px;
+  line-height: 1.3rem;
+  margin: 0;
+  padding: 0;
+  color: $fg-primary;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  min-height: 100vh;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  background-color: $bg-primary;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+
+  .logo {
+    margin: 0.5rem;
+    text-decoration: none;
+    color: white;
+    font-variation-settings: 'wght' 700;
+    padding-left: 20px;
+
+    .tag {
+      font-variation-settings: 'wght' 400;
+    }
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
+
+    .dropdown {
+      margin: 0.5em 1em;
+
+      .item {
+        background-color: unset;
+        padding: unset;
+        border: unset;
+        color: white;
+      }
+
+      .cta {
+        font-variation-settings: 'wght' 650;
+        background-color: gold;
+        color: $bg-primary;
+        border-radius: 4px;
+        padding: 0.5em 1em;
+      }
+    }
+  }
+}
+
+#banner {
+  background-color: #fffedb;
+
+  .container {
+    display: flex;
+    flex-flow: row wrap;
+    padding: 50px 0;
+    position: relative;
+    z-index: 2;
+
+    & > .text {
+      flex-basis: 32%;
+      padding-top: 50px;
+
+      h1 {
+        font-size: 40px;
+        line-height: 1.2em;
+        color: $bg-primary
+      }
+
+      h2 {
+        font-size: 32px;
+        line-height: 1.3em;
+      }
+    }
+
+    & > .fig {
+      flex-basis: 68%;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    & > .fig img {
+      box-sizing: border-box;
+      text-align: center;
+      max-height: 450px;
+      max-width: 550px;
+    }
+  }
+}
+
+.container {
+  box-sizing: border-box;
+  max-width: 1110px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
