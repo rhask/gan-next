@@ -1,0 +1,10 @@
+name = "gannext"
+type = "webpack"
+account_id = 'f318511b33ed2e89fbbbea819a39c2bc'
+zone_id = '50a7f1711973f9c16ba8296454c53dc2'
+route = 'gannext.briancarbone.com/*'
+usage_model = ''
+compatibility_flags = []
+workers_dev = false
+site = { bucket = "./public", entry-point = "workers-site" }
+compatibility_date = "2022-02-21"
