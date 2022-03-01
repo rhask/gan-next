@@ -114,10 +114,57 @@ header {
   }
 }
 
+#regulations {
+  color: white;
+
+  & .container {
+    list-style: none;
+    padding-left: 20px 20px 20px 23px;
+    background-color: $bg-primary;
+    border-radius: 8px;
+  }
+
+  & ul {
+    padding: unset;
+  }
+
+  & .tick {
+    font-weight: bold;
+    list-style: none;
+    padding: 12px 12px 12px 38px;
+  }
+
+  & .tick::before {
+    -webkit-mask: url(loc-ch.svg);
+    mask: url(loc-ch.svg);
+    content: "";
+    float: left;
+    margin: 3px 0 0 -23px;
+    height: 16px;
+    width: 16px;
+
+    animation: blink 1.5s infinite alternate;
+  }
+
+  @keyframes blink {
+    0% {
+      background-color: #a7f542;
+    }
+
+    100% {
+      background-color: #f75a2f;
+    }
+  }
+}
+
 .container {
   box-sizing: border-box;
   max-width: 1110px;
   margin: 0 auto;
-  padding: 0 20px;
+  // padding: 0 20px;
   width: 100%;
+}
+
+section {
+  margin-bottom: 50px;
 }
