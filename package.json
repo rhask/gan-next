@@ -1,5 +1,5 @@
 {
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.4.0"
+    "@cloudflare/workers-types": "^3.9.0"
   }
 }
