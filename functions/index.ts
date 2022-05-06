@@ -25,7 +25,8 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     //  .finally(() => writer.close());
   })()
 
-  return new Response(readable, response);
+  //return new Response(readable, response);
+  return response;
 };
 
 async function clearbit(key: string, ipaddr?: string): Promise<Reveal> {
