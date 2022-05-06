@@ -9,8 +9,8 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .transform(await next());
 
   const { readable, writable } = new TransformStream();
+  await response.body.pipeTo(writable, { preventClose: true });
   (async function() {
-    await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
     clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => {
