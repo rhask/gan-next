@@ -15,10 +15,11 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#test", { 
       async element(el) { 
         el.setInnerContent(readable);
-        t2();
       } 
     })
     .transform(await next());
+
+  t2();
 
   //const { readable, writable } = new TransformStream();
   //async function t() {
