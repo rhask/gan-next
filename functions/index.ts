@@ -8,10 +8,10 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#test", { 
       async element(el) { 
         const { readable, writable } = new TransformStream();
-        const writer = writable.getWriter();
-        writer.write(new TextEncoder().encode("oh gurl"));
-        writer.close();
         el.setInnerContent(readable);
+        const writer = writable.getWriter();
+        writer.write(new TextEncoder().encode("streamed content"));
+        writer.close();
       } 
     })
     .transform(await next());
