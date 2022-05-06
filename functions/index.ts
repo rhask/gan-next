@@ -4,15 +4,15 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
   const ipaddr = request.headers.get("CF-Connecting-IP");
 
   const response = new HTMLRewriter()
-    .on("span.country", { async element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
-    .on("#regulations .tick:first-of-type", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
+    .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
+    .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .transform(await next());
 
   const { readable, writable } = new TransformStream();
   waitUntil((async () => {
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
-    await clearbit(env.CBSK, ipaddr)
+    clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => {
         const html = streamFulfilled(onfulfilled);
         writer.write(new TextEncoder().encode(html));
