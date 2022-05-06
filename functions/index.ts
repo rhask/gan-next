@@ -1,6 +1,7 @@
 export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = cf;
+  const ipaddr = request.headers.get("CF-Connecting-IP");
 
   const response = new HTMLRewriter()
     .on("span.country", { async element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
@@ -11,20 +12,23 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
   (async function() {
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
-    const ipaddr = request.headers.get("CF-Connecting-IP");
-    const html = clearbit(env.CBSK, ipaddr)
-      .then(onfulfilled => streamFulfilled(onfulfilled))
-      .then(html => {
+    clearbit(env.CBSK, ipaddr)
+      .then(onfulfilled => {
+        const html = streamFulfilled(onfulfilled);
         writer.write(new TextEncoder().encode(html));
-        writer.close();
       })
-      .catch(onrejected => streamRejected(onrejected));
+      .catch(onrejected => {
+        const html = streamRejected(onrejected);
+        writer.write(new TextEncoder().encode(html));
+      })
+      .finally(() => writer.close());
   })()
 
   return new Response(readable, response);
 };
 
-async function clearbit(key: string, ipaddr: string): Promise<Reveal> {
+async function clearbit(key: string, ipaddr?: string): Promise<Reveal> {
+  if (ipaddr === null) return Promise.reject();
   const endpoint = "https://reveal.clearbit.com/v1/companies/find?ip=";
   return fetch(endpoint + ipaddr, { headers: { "Authorization": `Bearer ${key}` } }).then(response => {
     return new Promise((resolve, reject) => response.ok ? resolve(response.json<Reveal>()) : reject(response.statusText))
@@ -44,7 +48,7 @@ function streamFulfilled(reveal: Reveal): string {
 }
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${ipaddr}</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${rejected}</li>'</script>`;
 }
 
 interface Reveal {
