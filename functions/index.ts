@@ -92,7 +92,7 @@ function streamFulfilledK(kickfire: Kickfire): string {
 }
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Clearbit query failure (${rejected}).</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Clearbit query failure.</li>'</script>`;
 }
 
 interface Clearbit {
