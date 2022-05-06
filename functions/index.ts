@@ -1,4 +1,4 @@
-export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, next, env }) => {
+export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, waitUntil, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = cf;
 
@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     })
     .transform(await next());
 
-  t2();
+  waitUntil(t2());
 
   //const { readable, writable } = new TransformStream();
   //async function t() {
@@ -31,9 +31,9 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
 
   //t();
 
-  clearbit(env.CBSK, "74.64.207.161")//request.headers.get("CF-Connecting-IP"))
-    .then(onfulfilled => console.log(onfulfilled.company.name))
-    .catch(onrejected => console.log(onrejected));
+  //clearbit(env.CBSK, "74.64.207.161")//request.headers.get("CF-Connecting-IP"))
+  //  .then(onfulfilled => console.log(onfulfilled.company.name))
+  //  .catch(onrejected => console.log(onrejected));
 
   return response;
   //return new Response(readable, response);
