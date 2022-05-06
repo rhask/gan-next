@@ -8,22 +8,22 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#regulations .tick:first-of-type", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .transform(await next());
 
-  const { readable, writable } = new TransformStream();
-  (async function() {
-    await response.body.pipeTo(writable, { preventClose: true });
-    writable.close();
-    //const writer = writable.getWriter();
-    //clearbit(env.CBSK, ipaddr)
-    //  .then(onfulfilled => {
-    //    const html = streamFulfilled(onfulfilled);
-    //    writer.write(new TextEncoder().encode(html));
-    //  })
-    //  .catch(onrejected => {
-    //    const html = streamRejected(onrejected);
-    //    writer.write(new TextEncoder().encode(html));
-    //  })
-    //  .finally(() => writer.close());
-  })()
+  //const { readable, writable } = new TransformStream();
+  //(async function() {
+  //  await response.body.pipeTo(writable, { preventClose: true });
+  //  writable.close();
+  //  const writer = writable.getWriter();
+  //  clearbit(env.CBSK, ipaddr)
+  //    .then(onfulfilled => {
+  //      const html = streamFulfilled(onfulfilled);
+  //      writer.write(new TextEncoder().encode(html));
+  //    })
+  //    .catch(onrejected => {
+  //      const html = streamRejected(onrejected);
+  //      writer.write(new TextEncoder().encode(html));
+  //    })
+  //    .finally(() => writer.close());
+  //})()
 
   //return new Response(readable, response);
   return response;
