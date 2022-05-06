@@ -2,6 +2,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
   const { cf } = request;
   const { city, regionCode, country } = cf;
   const ipaddr = request.headers.get("CF-Connecting-IP");
+  console.log(ipaddr);
   const response = await next();
 
   //const transformed = new HTMLRewriter()
@@ -19,7 +20,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
         writer.write(new TextEncoder().encode(html));
       })
       .catch(onrejected => {
-        const html = streamRejected(onrejected);
+        const html = streamRejected(ipaddr);
         writer.write(new TextEncoder().encode(html));
       })
       .finally(() => writer.close());
@@ -49,7 +50,7 @@ function streamFulfilled(reveal: Reveal): string {
 }
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Unrecognized visitor.</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Unrecognized visitor (${rejected}).</li>'</script>`;
 }
 
 interface Reveal {
