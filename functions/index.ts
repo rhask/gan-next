@@ -49,7 +49,7 @@ function streamFulfilled(reveal: Reveal): string {
 }
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${rejected}</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Unrecognized visitor.</li>'</script>`;
 }
 
 interface Reveal {
