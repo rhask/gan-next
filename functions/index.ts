@@ -1,16 +1,21 @@
 export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = cf;
+
+  const { readable, writable } = new TransformStream();
+  async function t2() {
+      const writer = writable.getWriter();
+      writer.write(new TextEncoder().encode("streamed content"));
+      writer.close();
+  }
   
   const response = new HTMLRewriter()
     .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
     .on("#regulations .tick", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .on("#test", { 
       async element(el) { 
-        const { readable, writable } = new TransformStream();
+        t2();
         el.setInnerContent(readable);
-        const writer = writable.getWriter();
-        writer.write(new TextEncoder().encode("streamed content"));
       } 
     })
     .transform(await next());
