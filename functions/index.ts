@@ -10,6 +10,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
 
   const { readable, writable } = new TransformStream();
   waitUntil((async () => {
+    await scheduler.wait(1);
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
     clearbit(env.CBSK, ipaddr)
@@ -41,9 +42,9 @@ function streamFulfilled(reveal: Reveal): string {
     Sector: reveal.company.category.sector,
     Industry: reveal.company.category.industry,
     "SIC Code": reveal.company.category.sicCode
-  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`).join("");
+  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`);
   return `<script>
-    document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${rows}</table></li>';
+    document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${rows.join("")}</table></li>';
   </script>`;
 }
 
