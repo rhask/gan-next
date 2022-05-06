@@ -12,7 +12,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
   waitUntil((async () => {
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
-    clearbit(env.CBSK, ipaddr)
+    await clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => {
         const html = streamFulfilled(onfulfilled);
         writer.write(new TextEncoder().encode(html));
