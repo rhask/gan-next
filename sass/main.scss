@@ -146,6 +146,10 @@ header {
     animation: blink 1.5s infinite alternate;
   }
 
+  & .tick.hidden::before {
+    visibility: hidden;
+  }
+
   @keyframes blink {
     0% {
       background-color: #a7f542;

@@ -1,53 +1,47 @@
-export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, waitUntil, next, env }) => {
+export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = cf;
 
-  const { readable, writable } = new TransformStream();
-  async function t2() {
-      const writer = writable.getWriter();
-      writer.write(new TextEncoder().encode("streamed content"));
-      writer.close();
-  }
-  
   const response = new HTMLRewriter()
     .on("span.country", { async element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
-    .on("#regulations .tick", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
-    .on("#test", { 
-      async element(el) { 
-        el.setInnerContent(readable);
-      } 
-    })
+    .on("#regulations .tick:first-of-type", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .transform(await next());
 
-  waitUntil(t2());
+  const html = await clearbit(env.CBSK, "74.64.207.161")//request.headers.get("CF-Connecting-IP"))
+    .then(onfulfilled => streamFulfilled(onfulfilled))
+    .catch(_ => "empty");
 
-  //const { readable, writable } = new TransformStream();
-  //async function t() {
-  //  await response.body.pipeTo(writable, { preventClose: true });
-  //  const writer = writable.getWriter();
-  //  writer.write(new TextEncoder().encode(`<script>const el = document.getElementById("test"); el.textContent = "melt";</script>`));
-  //  writer.close();
-  //}
+  const { readable, writable } = new TransformStream();
+  async function t() {
+    await response.body.pipeTo(writable, { preventClose: true });
+    const writer = writable.getWriter();
+    writer.write(new TextEncoder().encode(html));
+    writer.close();
+  }
 
-  //t();
+  t();
 
-  //clearbit(env.CBSK, "74.64.207.161")//request.headers.get("CF-Connecting-IP"))
-  //  .then(onfulfilled => console.log(onfulfilled.company.name))
-  //  .catch(onrejected => console.log(onrejected));
-
-  return response;
-  //return new Response(readable, response);
+  return new Response(readable, response);
 };
 
-async function clearbit(key: string, ipaddr: string): Promise<Reveal | null> {
+async function clearbit(key: string, ipaddr: string): Promise<Reveal> {
   const endpoint = "https://reveal.clearbit.com/v1/companies/find?ip=";
   return fetch(endpoint + ipaddr, { headers: { "Authorization": `Bearer ${key}` } }).then(response => {
     return new Promise((resolve, reject) => response.ok ? resolve(response.json<Reveal>()) : reject(response.statusText))
   });
 }
 
-function streamFulfilled(): string {
-  return `<script></script>`;
+function streamFulfilled(reveal: Reveal): string {
+  const rows = Object.entries({ 
+    Company: reveal.company.name,
+    Sector: reveal.company.category.sector,
+    Industry: reveal.company.category.industry,
+    "SIC Code": reveal.company.category.sicCode
+  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`)
+  .join("");
+  return `<script>
+    document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${rows}</table></li>';
+  </script>`;
 }
 
 function streamRejected() {
