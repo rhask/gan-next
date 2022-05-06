@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     })
     .transform(await next());
 
-  t2();
+  await t2();
 
   //const { readable, writable } = new TransformStream();
   //async function t() {
