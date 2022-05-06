@@ -14,8 +14,8 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#regulations .tick", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .on("#test", { 
       async element(el) { 
-        t2();
         el.setInnerContent(readable);
+        t2();
       } 
     })
     .transform(await next());
