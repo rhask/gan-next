@@ -37,8 +37,7 @@ function streamFulfilled(reveal: Reveal): string {
     Sector: reveal.company.category.sector,
     Industry: reveal.company.category.industry,
     "SIC Code": reveal.company.category.sicCode
-  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`)
-  .join("");
+  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`).join("");
   return `<script>
     document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${rows}</table></li>';
   </script>`;
