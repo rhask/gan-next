@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://briancarbone.com/sitemap.xml
+Sitemap: https://gannext.briancarbone.com/sitemap.xml
