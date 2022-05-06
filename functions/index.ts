@@ -10,8 +10,8 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
   }
   
   const response = new HTMLRewriter()
-    .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
-    .on("#regulations .tick", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
+    .on("span.country", { async element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
+    .on("#regulations .tick", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .on("#test", { 
       async element(el) { 
         el.setInnerContent(readable);
@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     })
     .transform(await next());
 
-  await t2();
+  t2();
 
   //const { readable, writable } = new TransformStream();
   //async function t() {
