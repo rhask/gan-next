@@ -7,7 +7,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#regulations .tick:first-of-type", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .transform(await next());
 
-  const html = await clearbit(env.CBSK, "74.64.207.161")//request.headers.get("CF-Connecting-IP"))
+  const html = await clearbit(env.CBSK, request.headers.get("CF-Connecting-IP"))
     .then(onfulfilled => streamFulfilled(onfulfilled))
     .catch(_ => "empty");
 
