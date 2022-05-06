@@ -11,7 +11,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
     .onDocument({
       async end(end) { 
         const script = await clearbit(env.CBSK, ipaddr)
-          .then(streamFulfilled)
+          .then(streamFulfilledC)
           .catch(streamRejected);
         
         //const script = await leadfeeder(env.LFSK, ipaddr)
@@ -55,7 +55,7 @@ async function kickfire(key: string, ipaddr?: string): Promise<Kickfire> {
   });
 }
 
-function streamFulfilled(clearbit: Clearbit): string {
+function streamFulfilledC(clearbit: Clearbit): string {
   const rows = Object.entries({ 
     Company: clearbit.company.name,
     Sector: clearbit.company.category.sector,
