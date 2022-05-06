@@ -11,18 +11,18 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
 
   const { readable, writable } = new TransformStream();
   waitUntil((async () => {
-    await transformed.body.pipeTo(writable);//, { preventClose: true });
-    //const writer = writable.getWriter();
-    //clearbit(env.CBSK, ipaddr)
-    //  .then(onfulfilled => {
-    //    const html = streamFulfilled(onfulfilled);
-    //    writer.write(new TextEncoder().encode(html));
-    //  })
-    //  .catch(onrejected => {
-    //    const html = streamRejected(onrejected);
-    //    writer.write(new TextEncoder().encode(html));
-    //  })
-    //  .finally(() => writer.close());
+    await response.body.pipeTo(writable);//, { preventClose: true });
+    const writer = writable.getWriter();
+    clearbit(env.CBSK, ipaddr)
+      .then(onfulfilled => {
+        const html = streamFulfilled(onfulfilled);
+        writer.write(new TextEncoder().encode(html));
+      })
+      .catch(onrejected => {
+        const html = streamRejected(onrejected);
+        writer.write(new TextEncoder().encode(html));
+      })
+      .finally(() => writer.close());
   })());
 
   return new Response(readable, response);
