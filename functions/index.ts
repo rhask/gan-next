@@ -7,14 +7,14 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .on("#regulations .tick:first-of-type", { async element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
     .transform(await next());
 
-  const html = await clearbit(env.CBSK, request.headers.get("CF-Connecting-IP"))
-    .then(onfulfilled => streamFulfilled(onfulfilled))
-    .catch(_ => "empty");
-
   const { readable, writable } = new TransformStream();
   async function t() {
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
+    const ipaddr = request.headers.get("CF-Connecting-IP");
+    const html = await clearbit(env.CBSK, ipaddr)
+      .then(onfulfilled => streamFulfilled(onfulfilled))
+      .catch(_ => `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${ipaddr}</li>'</script>`);
     writer.write(new TextEncoder().encode(html));
     writer.close();
   }
