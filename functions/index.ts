@@ -14,7 +14,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     const ipaddr = request.headers.get("CF-Connecting-IP");
     const html = await clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => streamFulfilled(onfulfilled))
-      .catch(_ => `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${ipaddr}</li>'</script>`);
+      .catch(onrejected => streamRejected(onrejected));
     writer.write(new TextEncoder().encode(html));
     writer.close();
   }
@@ -43,7 +43,8 @@ function streamFulfilled(reveal: Reveal): string {
   </script>`;
 }
 
-function streamRejected() {
+function streamRejected(rejected: string): string {
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Not found: ${ipaddr}</li>'</script>`;
 }
 
 interface Reveal {
