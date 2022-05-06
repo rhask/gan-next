@@ -35,7 +35,7 @@ async function clearbit(key: string, ipaddr?: string): Promise<Clearbit> {
   if (ipaddr === null) return Promise.reject();
   const url = `https://reveal.clearbit.com/v1/companies/find?ip=${ipaddr}`;
   return fetch(url, { headers: { "Authorization": `Bearer ${key}` } }).then(response => {
-    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Clearbit>()) : reject(response.statusText))
+    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Clearbit>()) : reject(response.status))
   });
 }
 
@@ -43,7 +43,7 @@ async function leadfeeder(key: string, ipaddr?: string): Promise<Leadfeeder> {
   if (ipaddr === null) return Promise.reject();
   const url = `https://api.lf-discover.com/companies?ip=${ipaddr}`;
   return fetch(url, { headers: { "X-API-KEY": key } }).then(response => {
-    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Leadfeeder>()) : reject(response.statusText))
+    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Leadfeeder>()) : reject(response.status))
   });
 }
 
@@ -51,7 +51,7 @@ async function kickfire(key: string, ipaddr?: string): Promise<Kickfire> {
   if (ipaddr === null) return Promise.reject();
   const url = `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`;
   return fetch(url).then(response => {
-    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Kickfire>()) : reject(response.statusText))
+    return new Promise((resolve, reject) => response.ok ? resolve(response.json<Kickfire>()) : reject(response.status))
   });
 }
 
@@ -92,7 +92,7 @@ function streamFulfilledK(kickfire: Kickfire): string {
 }
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Unrecognized visitor (${rejected}).</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Clearbit query failure (${rejected}).</li>'</script>`;
 }
 
 interface Clearbit {
