@@ -11,7 +11,6 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
         el.setInnerContent(readable);
         const writer = writable.getWriter();
         writer.write(new TextEncoder().encode("streamed content"));
-        writer.close();
       } 
     })
     .transform(await next());
