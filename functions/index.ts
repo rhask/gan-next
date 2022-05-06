@@ -8,18 +8,18 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, n
     .transform(await next());
 
   const { readable, writable } = new TransformStream();
-  async function t() {
+  (async function() {
     await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
     const ipaddr = request.headers.get("CF-Connecting-IP");
-    const html = await clearbit(env.CBSK, ipaddr)
+    const html = clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => streamFulfilled(onfulfilled))
+      .then(html => {
+        writer.write(new TextEncoder().encode(html));
+        writer.close();
+      })
       .catch(onrejected => streamRejected(onrejected));
-    writer.write(new TextEncoder().encode(html));
-    writer.close();
-  }
-
-  t();
+  })()
 
   return new Response(readable, response);
 };
