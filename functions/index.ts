@@ -1,14 +1,15 @@
 export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, waitUntil, next, env }) => {
-  const { cf } = request;
-  const { city, regionCode, country } = cf;
-  const ipaddr = request.headers.get("CF-Connecting-IP");
+  //const { cf } = request;
+  //const { city, regionCode, country } = cf;
+  //const ipaddr = request.headers.get("CF-Connecting-IP");
 
-  const response = new HTMLRewriter()
-    .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
-    .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
-    .transform(await next());
+  //const response = new HTMLRewriter()
+  //  .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
+  //  .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
+  //  .transform(await next());
 
   const { readable, writable } = new TransformStream();
+  const response = await next();
   waitUntil((async () => {
     await response.body.pipeTo(writable);//, { preventClose: true });
     //const writer = writable.getWriter();
