@@ -11,7 +11,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string }> = async ({ request, w
 
   const { readable, writable } = new TransformStream();
   waitUntil((async () => {
-    await response.body.pipeTo(writable);//, { preventClose: true });
+    await response.body.pipeTo(writable, { preventClose: true });
     const writer = writable.getWriter();
     clearbit(env.CBSK, ipaddr)
       .then(onfulfilled => {
