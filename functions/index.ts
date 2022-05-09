@@ -14,7 +14,6 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
         const script = await clearbit(env.CBSK, ipaddr)
           .then(f => streamFulfilledC(f, id))
           .catch(r => streamRejected(r, id));
-        
         end.append(script, { html: true }); 
       }
     })
@@ -60,6 +59,24 @@ const kickfire = platform<Kickfire>(
   (key, ipaddr) => `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`
 );
 
+function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>): (id: string, t: T) => string {
+  return (id: string, t: T) => {
+    const rows = Object.entries(format(t));
+
+    const genRow = (key: string, value?: string) => 
+      `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
+
+    const genScript = (str: string) => `<script>
+      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
+    </script>`;
+    
+    return genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)));
+    //return rows.every((value): value is [string, string] => value[0] !== null && value[1] !== null) 
+    //  ? genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)))
+    //  : streamRejected("incomplete result");
+  }
+}
+
 const streamFulfilledC = (clearbit: Clearbit, id: string) => streamFulfilled((clearbit: Clearbit) => {
   return {
     Company: clearbit.company?.name,
@@ -78,37 +95,14 @@ const streamFulfilledL = (leadfeeder: Leadfeeder, id: string) => streamFulfilled
   }
 })(id, leadfeeder);
 
-function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>): (id: string, t: T) => string {
-  return (id: string, t: T) => {
-    const rows = Object.entries(format(t));
-
-    const genRow = (key: string, value?: string) => 
-      `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
-
-    const genScript = (str: string) => `<script>
-      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
-    </script>`;
-    
-    return genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)));
+const streamFulfilledK = (kickfire: Kickfire, id: string) => streamFulfilled((kickfire: Kickfire) => {
+  return {
+    Company: kickfire.data?.at(0)?.companyName,
+    Domain: kickfire.data?.at(0)?.website,
+    "SIC Code": kickfire.data?.at(0)?.sicCode,
+    "Employee Count": kickfire.data?.at(0)?.employees,
   }
-  //return rows.every((value): value is [string, string] => value[0] !== null && value[1] !== null) 
-  //  ? genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)))
-  //  : streamRejected("incomplete result");
-}
-
-/*
-function streamFulfilledK(kickfire: Kickfire): string {
-  const rows = Object.entries({ 
-    Company: kickfire.data[0].companyName,
-    Domain: kickfire.data[0].website,
-    "SIC Code": kickfire.data[0].sicCode,
-    "Employee Count": kickfire.data[0].employees,
-  }).map(value => `<tr><td style="color: #ef323d">${value[0]}</td><td style="font-weight: normal">${value[1]}</td></tr>`);
-  return `<script>
-    document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${rows.join("")}</table></li>';
-  </script>`;
-}
-*/
+})(id, kickfire);
 
 function streamRejected(rejected: string, id: string): string {
   return `<script>document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
