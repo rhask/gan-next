@@ -10,18 +10,20 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
     .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`); } })
     .onDocument({
       async end(end) { 
+        const id = "p1";
         const script = await clearbit(env.CBSK, ipaddr)
-          .then(streamFulfilledC)
-          .catch(r => streamRejected(r, "p1"));
+          .then(f => streamFulfilledC(id)(f))
+          .catch(r => streamRejected(r, id));
         
         end.append(script, { html: true }); 
       }
     })
     .onDocument({
       async end(end) { 
+        const id = "p2";
         const script = await leadfeeder(env.LFSK, ipaddr)
-          .then(streamFulfilledL)
-          .catch(r => streamRejected(r, "p2"));
+          .then(f => streamFulfilledL(id)(f))
+          .catch(r => streamRejected(r, id));
         end.append(script, { html: true }); 
       }
     })
@@ -58,7 +60,7 @@ const kickfire = platform<Kickfire>(
   (key, ipaddr) => `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`
 );
 
-const streamFulfilledC = streamFulfilled<Clearbit>( 
+const streamFulfilledC = (id: string) => streamFulfilled<Clearbit>( 
   (clearbit: Clearbit) => {
     return { 
       Company: clearbit.company?.name,
@@ -67,10 +69,10 @@ const streamFulfilledC = streamFulfilled<Clearbit>(
       "SIC Code": clearbit.company?.category.sicCode,
     };
   },
-  "p1"
+  id
 );
 
-const streamFulfilledL = streamFulfilled<Leadfeeder>(
+const streamFulfilledL = (id: string) => streamFulfilled<Leadfeeder>(
   (leadfeeder: Leadfeeder) => {
     return {
       Company: leadfeeder.company?.name,
@@ -79,7 +81,7 @@ const streamFulfilledL = streamFulfilled<Leadfeeder>(
       "Employee Count": `${leadfeeder.company?.employees_range.min} - ${leadfeeder.company?.employees_range.max}`,
     };
   },
-  "p2"
+  id
 );
 
 function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>, id: string): (t: T) => string {
