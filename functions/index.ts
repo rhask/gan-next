@@ -12,7 +12,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const id = "p1";
         const script = await clearbit(env.CBSK, ipaddr)
-          .then(f => streamFulfilledC(id)(f))
+          .then(f => streamFulfilledC(f, id))
           .catch(r => streamRejected(r, id));
         
         end.append(script, { html: true }); 
@@ -22,7 +22,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const id = "p2";
         const script = await leadfeeder(env.LFSK, ipaddr)
-          .then(f => streamFulfilledL(id)(f))
+          .then(f => streamFulfilledL(f, id))
           .catch(r => streamRejected(r, id));
         end.append(script, { html: true }); 
       }
@@ -60,32 +60,26 @@ const kickfire = platform<Kickfire>(
   (key, ipaddr) => `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`
 );
 
-const streamFulfilledC = (id: string) => streamFulfilled<Clearbit>( 
-  (clearbit: Clearbit) => {
-    return { 
-      Company: clearbit.company?.name,
-      Sector: clearbit.company?.category.sector,
-      Industry: clearbit.company?.category.industry,
-      "SIC Code": clearbit.company?.category.sicCode,
-    };
-  },
-  id
-);
+const streamFulfilledC = (clearbit: Clearbit, id: string) => streamFulfilled((clearbit: Clearbit) => {
+  return {
+    Company: clearbit.company?.name,
+    Sector: clearbit.company?.category.sector,
+    Industry: clearbit.company?.category.industry,
+    "SIC Code": clearbit.company?.category.sicCode,
+  }
+})(id, clearbit);
 
-const streamFulfilledL = (id: string) => streamFulfilled<Leadfeeder>(
-  (leadfeeder: Leadfeeder) => {
-    return {
-      Company: leadfeeder.company?.name,
-      Domain: leadfeeder.company?.domain,
-      "SIC Code": leadfeeder.company?.industries.sic[0],
-      "Employee Count": `${leadfeeder.company?.employees_range.min} - ${leadfeeder.company?.employees_range.max}`,
-    };
-  },
-  id
-);
+const streamFulfilledL = (leadfeeder: Leadfeeder, id: string) => streamFulfilled((leadfeeder: Leadfeeder) => {
+  return {
+    Company: leadfeeder.company?.name,
+    Domain: leadfeeder.company?.domain,
+    "SIC Code": leadfeeder.company?.industries.sic[0],
+    "Employee Count": `${leadfeeder.company?.employees_range.min} - ${leadfeeder.company?.employees_range.max}`,
+  }
+})(id, leadfeeder);
 
-function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>, id: string): (t: T) => string {
-  return (t: T) => {
+function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>): (id: string, t: T) => string {
+  return (id: string, t: T) => {
     const rows = Object.entries(format(t));
 
     const genRow = (key: string, value?: string) => 
