@@ -1,7 +1,7 @@
 export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: string }> = async ({ request, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = { ...cf };
-  const ipaddr = request.headers.get("CF-Connecting-IP");
+  const ipaddr = "74.64.207.161" || request.headers.get("CF-Connecting-IP");
   console.log(ipaddr);
   const response = await next();
 
