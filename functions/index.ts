@@ -117,7 +117,7 @@ function streamFulfilledK(kickfire: Kickfire): string {
 */
 
 function streamRejected(rejected: string, id: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
+  return `<script>document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
 }
 
 type Clearbit = Partial<{
