@@ -12,7 +12,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const script = await clearbit(env.CBSK, ipaddr)
           .then(streamFulfilledC)
-          .catch(streamRejected);
+          .catch(r => streamRejected(r, "p1"));
         
         end.append(script, { html: true }); 
       }
@@ -21,7 +21,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const script = await leadfeeder(env.LFSK, ipaddr)
           .then(streamFulfilledL)
-          .catch(streamRejected);
+          .catch(r => streamRejected(r, "p2"));
         end.append(script, { html: true }); 
       }
     })
@@ -114,7 +114,7 @@ function streamFulfilledK(kickfire: Kickfire): string {
 }
 */
 
-function streamRejected(rejected: string): string {
+function streamRejected(rejected: string, id: string): string {
   return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
 }
 
