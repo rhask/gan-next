@@ -10,18 +10,18 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
     .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`); } })
     .onDocument({
       async end(end) { 
-        //const script = await clearbit(env.LFSK, ipaddr)
-        //  .then(streamFulfilledC)
-        //  .catch(streamRejected);
+        const script = await clearbit(env.CBSK, ipaddr)
+          .then(streamFulfilledC)
+          .catch(streamRejected);
         
+        end.append(script, { html: true }); 
+      }
+    })
+    .onDocument({
+      async end(end) { 
         const script = await leadfeeder(env.LFSK, ipaddr)
           .then(streamFulfilledL)
           .catch(streamRejected);
-        
-        //const script = await kickfire(env.KFSK, ipaddr)
-        //  .then(streamFulfilledK)
-        //  .catch(streamRejected);
-        
         end.append(script, { html: true }); 
       }
     })
@@ -66,7 +66,8 @@ const streamFulfilledC = streamFulfilled<Clearbit>(
       Industry: clearbit.company?.category.industry,
       "SIC Code": clearbit.company?.category.sicCode,
     };
-  }
+  },
+  "p1"
 );
 
 const streamFulfilledL = streamFulfilled<Leadfeeder>(
@@ -77,10 +78,11 @@ const streamFulfilledL = streamFulfilled<Leadfeeder>(
       "SIC Code": leadfeeder.company?.industries.sic[0],
       "Employee Count": `${leadfeeder.company?.employees_range.min} - ${leadfeeder.company?.employees_range.max}`,
     };
-  }
+  },
+  "p2"
 );
 
-function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>): (t: T) => string {
+function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>, id: string): (t: T) => string {
   return (t: T) => {
     const rows = Object.entries(format(t));
 
@@ -88,7 +90,7 @@ function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>
       `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
     const genScript = (str: string) => `<script>
-      document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
+      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
     </script>`;
     
     return genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)));
@@ -113,7 +115,7 @@ function streamFulfilledK(kickfire: Kickfire): string {
 */
 
 function streamRejected(rejected: string): string {
-  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Leadfeeder query failure.</li>'</script>`;
+  return `<script>document.getElementById("p1").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
 }
 
 type Clearbit = Partial<{
