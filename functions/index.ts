@@ -67,7 +67,7 @@ function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>
       `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
     const genScript = (str: string) => `<script>
-      console.log(${t});
+      console.log(${JSON.stringify(t)});
       document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
     </script>`;
     
@@ -106,7 +106,9 @@ const streamFulfilledK = (kickfire: Kickfire, id: string) => streamFulfilled((ki
 })(id, kickfire);
 
 function streamRejected(rejected: string, id: string): string {
-  return `<script>document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'</script>`;
+  return `<script>
+    document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset">Query failure (${rejected}).</li>'
+  </script>`;
 }
 
 type Clearbit = Partial<{
