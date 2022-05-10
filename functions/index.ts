@@ -1,8 +1,7 @@
 export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: string }> = async ({ request, next, env }) => {
   const { cf } = request;
   const { city, regionCode, country } = { ...cf };
-  const ipaddr = request.headers.get("CF-Connecting-IP");
-  console.log(ipaddr);
+  const ipaddr = "74.64.207.161" || request.headers.get("CF-Connecting-IP");
   const response = await next();
 
   const transformed = new HTMLRewriter()
@@ -12,7 +11,7 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const id = "p1";
         const script = await clearbit(env.CBSK, ipaddr)
-          .then(f => streamFulfilledC(f, id))
+          .then(f => streamFulfilledNoOp(f, id))
           .catch(r => streamRejected(r, id));
         end.append(script, { html: true }); 
       }
@@ -21,11 +20,20 @@ export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: str
       async end(end) { 
         const id = "p2";
         const script = await leadfeeder(env.LFSK, ipaddr)
-          .then(f => streamFulfilledL(f, id))
+          .then(f => streamFulfilledNoOp(f, id))
           .catch(r => streamRejected(r, id));
         end.append(script, { html: true }); 
       }
     })
+    //.onDocument({
+    //  async end(end) { 
+    //    const id = "p3";
+    //    const script = await kickfire(env.KFSK, ipaddr)
+    //      .then(f => streamFulfilledK(f, id))
+    //      .catch(r => streamRejected(r, id));
+    //    end.append(script, { html: true }); 
+    //  }
+    //})
     .transform(response);
 
   return transformed;
@@ -38,6 +46,7 @@ function platform<T>(
   return async (key, ipaddr) => {
     if (ipaddr === null) return Promise.reject();
     const url = urlComp(key, ipaddr);
+    console.log(url);
     const headers = headersComp ? { headers: headersComp(key) } : {};
     return fetch(url, headers).then(response => new Promise((resolve, reject) => {
       return response.ok ? resolve(response.json<T>()) : reject(response.status);
@@ -59,7 +68,7 @@ const kickfire = platform<Kickfire>(
   (key, ipaddr) => `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`
 );
 
-function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>): (id: string, t: T) => string {
+function streamFulfilled<T>(format: (t: T) => Record<string, any>): (id: string, t: T) => string {
   return (id: string, t: T) => {
     const rows = Object.entries(format(t));
 
@@ -67,7 +76,6 @@ function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>
       `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
     const genScript = (str: string) => `<script>
-      console.log(${JSON.stringify(t)});
       document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
     </script>`;
     
@@ -77,33 +85,55 @@ function streamFulfilled<T>(format: (t: T) => Record<string, string | undefined>
     //  : streamRejected("incomplete result");
   }
 }
+function streamFulfilled2<T>(format: (t: T) => string): (id: string, t: T) => string {
+  return (id: string, t: T) => {
+    const rows = format(t);
 
-const streamFulfilledC = (clearbit: Clearbit, id: string) => streamFulfilled((clearbit: Clearbit) => {
-  return {
-    Company: clearbit.company?.name,
-    Sector: clearbit.company?.category.sector,
-    Industry: clearbit.company?.category.industry,
-    "SIC Code": clearbit.company?.category.sicCode,
-  }
-})(id, clearbit);
+    const genRow = (key: string, value?: string) => 
+      `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
-const streamFulfilledL = (leadfeeder: Leadfeeder, id: string) => streamFulfilled((leadfeeder: Leadfeeder) => {
-  return {
-    Company: leadfeeder.company?.name,
-    Domain: leadfeeder.company?.domain,
-    "SIC Code": leadfeeder.company?.industries.sic[0],
-    "Employee Count": `${leadfeeder.company?.employees_range.min} - ${leadfeeder.company?.employees_range.max}`,
+    const genScript = (str: string) => `<script>
+      const json = JSON.stringify(${str}, null, 2);
+      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset; font-family: monospace; font-weight: unset; font-size: 13px;"><table style="width: 100%; border-spacing: unset;">'+json+'</table></li>';
+    </script>`;
+    
+    return genScript(rows);
+    //return rows.every((value): value is [string, string] => value[0] !== null && value[1] !== null) 
+    //  ? genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)))
+    //  : streamRejected("incomplete result");
   }
-})(id, leadfeeder);
+}
 
-const streamFulfilledK = (kickfire: Kickfire, id: string) => streamFulfilled((kickfire: Kickfire) => {
+const streamFulfilledNoOp = (obj: any, id: string) => streamFulfilled2((obj: any) => {
+  return JSON.stringify(obj);
+})(id, obj);
+
+const streamFulfilledC = <T extends Clearbit>(cb: T, id: string) => streamFulfilled((cb: T) => {
   return {
-    Company: kickfire.data?.at(0)?.companyName,
-    Domain: kickfire.data?.at(0)?.website,
-    "SIC Code": kickfire.data?.at(0)?.sicCode,
-    "Employee Count": kickfire.data?.at(0)?.employees,
+    Company: cb.company?.name,
+    Sector: cb.company?.category.sector,
+    Industry: cb.company?.category.industry,
+    "SIC Code": cb.company?.category.sicCode,
   }
-})(id, kickfire);
+})(id, cb);
+
+const streamFulfilledL = <T extends Leadfeeder>(lf: T, id: string) => streamFulfilled((lf: T) => {
+  return {
+    Company: lf.company?.name,
+    Domain: lf.company?.domain,
+    "SIC Code": lf.company?.industries.sic[0],
+    "Employee Count": `${lf.company?.employees_range.min} - ${lf.company?.employees_range.max}`,
+  }
+})(id, lf);
+
+const streamFulfilledK = <T extends Kickfire>(kf: T, id: string) => streamFulfilled((kf: T) => {
+  return {
+    Company: kf.data?.at(0)?.companyName,
+    Domain: kf.data?.at(0)?.website,
+    "SIC Code": kf.data?.at(0)?.sicCode,
+    "Employee Count": kf.data?.at(0)?.employees,
+  }
+})(id, kf);
 
 function streamRejected(rejected: string, id: string): string {
   return `<script>
