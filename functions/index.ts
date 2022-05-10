@@ -93,7 +93,7 @@ function streamFulfilled2<T>(format: (t: T) => string): (id: string, t: T) => st
       `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
     const genScript = (str: string) => `<script>
-      const json = JSON.stringify(${str}, null, 2);
+      const ${crypto.randomBytes(32).toString("hex")} = JSON.stringify(${str}, null, 2);
       document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset; font-family: monospace; font-weight: unset; font-size: 13px;"><table style="width: 100%; border-spacing: unset;">'+json+'</table></li>';
     </script>`;
     
