@@ -92,9 +92,10 @@ function streamFulfilled2<T>(format: (t: T) => string): (id: string, t: T) => st
     const genRow = (key: string, value?: string) => 
       `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
 
+    const rand = crypto.randomUUID().slice(0, 7);
     const genScript = (str: string) => `<script>
-      const ${crypto.randomUUID().slice(0, 7)} = JSON.stringify(${str}, null, 2);
-      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset; font-family: monospace; font-weight: unset; font-size: 13px;"><table style="width: 100%; border-spacing: unset;">'+json+'</table></li>';
+      const id_${rand} = JSON.stringify(${str}, null, 2);
+      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset; font-family: monospace; font-weight: unset; font-size: 13px;"><table style="width: 100%; border-spacing: unset;">' + id_${rand} + '</table></li>';
     </script>`;
     
     return genScript(rows);
