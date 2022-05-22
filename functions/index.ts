@@ -1,90 +1,17 @@
 export const onRequestGet: PagesFunction<{ CBSK: string, LFSK: string, KFSK: string }> = async ({ request, next, env }) => {
-  const { cf } = request;
-  const { city, regionCode, country } = { ...cf };
-  const ipaddr = request.headers.get("CF-Connecting-IP");
-  const response = await next();
+  const { cf } = request
+  const { city, regionCode, country } = { ...cf }
+  const ipaddr = request.headers.get("CF-Connecting-IP")
+  const response = await next()
 
   const transformed = new HTMLRewriter()
-    .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`); } })
-    .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`); } })
-    .onDocument({
-      async end(end) { 
-        const id = "p1";
-        const script = await clearbit(env.CBSK, ipaddr)
-          .then(f => streamFulfilledNoOp(f, id))
-          .catch(r => streamRejected(r, id));
-        end.append(script, { html: true }); 
-      }
-    })
-    .onDocument({
-      async end(end) { 
-        const id = "p2";
-        const script = await leadfeeder(env.LFSK, ipaddr)
-          .then(f => streamFulfilledNoOp(f, id))
-          .catch(r => streamRejected(r, id));
-        end.append(script, { html: true }); 
-      }
-    })
-    //.onDocument({
-    //  async end(end) { 
-    //    const id = "p3";
-    //    const script = await kickfire(env.KFSK, ipaddr)
-    //      .then(f => streamFulfilledK(f, id))
-    //      .catch(r => streamRejected(r, id));
-    //    end.append(script, { html: true }); 
-    //  }
-    //})
-    .transform(response);
+    .on("span.country", { element(el) { el.setInnerContent(`${city}, ${regionCode}, ${country}`) } })
+    .on("#regulations .tick:first-of-type", { element(el) { el.setInnerContent(`Regulatory compliance alerts for ${country} available. Access alerts ➞`) } })
+    .transform(response)
 
-  return transformed;
-};
-
-function platform<T>(
-  urlComp: (key: string, ipaddr: string) => string,
-  headersComp?: (key: string) => Record<string, string>
-): (key: string, ipaddr: string | null) => Promise<T> {
-  return async (key, ipaddr) => {
-    if (ipaddr === null) return Promise.reject();
-    const url = urlComp(key, ipaddr);
-    console.log(url);
-    const headers = headersComp ? { headers: headersComp(key) } : {};
-    return fetch(url, headers).then(response => new Promise((resolve, reject) => {
-      return response.ok ? resolve(response.json<T>()) : reject(response.status);
-    }));
-  } 
-};
-
-const clearbit = platform<Clearbit>(
-  (_, ipaddr) => `https://reveal.clearbit.com/v1/companies/find?ip=${ipaddr}`,
-  key => ({ Authorization: `Bearer ${key}` })
-);
-
-const leadfeeder = platform<Leadfeeder>(
-  (_, ipaddr) => `https://api.lf-discover.com/companies?ip=${ipaddr}`,
-  key => ({ "X-API-KEY": key })
-);
-
-const kickfire = platform<Kickfire>(
-  (key, ipaddr) => `https://api.kickfire.com/v3/company?ip=${ipaddr}&key=${key}`
-);
-
-function streamFulfilled<T>(format: (t: T) => Record<string, any>): (id: string, t: T) => string {
-  return (id: string, t: T) => {
-    const rows = Object.entries(format(t));
-
-    const genRow = (key: string, value?: string) => 
-      `<tr><td style="color: #ef323d">${key}</td><td style="font-weight: normal">${value}</td></tr>`;
-
-    const genScript = (str: string) => `<script>
-      document.getElementById("${id}").innerHTML = '<li class="tick hidden" style="padding: unset"><table style="width: 100%; border-spacing: unset";>${str}</table></li>';
-    </script>`;
-    
-    return genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)));
-    //return rows.every((value): value is [string, string] => value[0] !== null && value[1] !== null) 
-    //  ? genScript(rows.map(value => genRow(value[0], value[1])).reduce((prev, current) => prev.concat(current)))
-    //  : streamRejected("incomplete result");
-  }
+  return transformed
 }
+<<<<<<< HEAD
 function streamFulfilled2<T>(format: (t: T) => string): (id: string, t: T) => string {
   return (id: string, t: T) => {
     const rows = format(t);
@@ -203,3 +130,5 @@ type Kickfire = Partial<{
     }
   ];
 }>
+=======
+>>>>>>> 8644599 (mcp)
