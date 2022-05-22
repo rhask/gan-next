@@ -3,7 +3,7 @@ import mailchannelsplugin from "@cloudflare/pages-plugin-mailchannels"
 export const onRequest = mailchannelsplugin({
   personalizations: [
     {
-      to: [{ name: "Brian", email: "bcar@ganintegrity.com" }],
+      to: [{ name: "Brian", email: "brianjohncarbone@gmail.com" }],
     },
   ],
   from: { name: "Compliance Bot", email: "compliance@briancarbone.com" },
