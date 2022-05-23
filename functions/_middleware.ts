@@ -6,7 +6,6 @@ export const onRequest = mailchannelsplugin({
       to: [{ name: "Brian Carbone", email: "bcar@ganintegrity.com" }],
     },
   ],
-  from: { name: "Compliance Bot", email: "hello@briancarbone.com" },
-  respondWith: () =>
-    new Response(null, { status: 302, headers: { Location: "/" } })
+  from: { name: "Nerve Bot", email: "hello@briancarbone.com" },
+  respondWith: () => new Response(null, { status: 302, headers: { Location: "/" } })
 })
